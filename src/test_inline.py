@@ -1,6 +1,6 @@
 import unittest
 
-from converter import (
+from inline import (
         text_node_to_html_node, 
         text_to_textnodes,
         split_nodes_delimiter,
@@ -10,7 +10,7 @@ from converter import (
 from textnode import TextType, TextNode
 from htmlnode import LeafNode
 
-class TestConverter(unittest.TestCase):
+class TestInline(unittest.TestCase):
     def test_normal_text_type_to_text_leaf(self):
         node = self.__create_text_node("Hello", TextType.NORMAL)
         expected = "Hello"
@@ -50,7 +50,6 @@ class TestConverter(unittest.TestCase):
     def __create_text_node(self, text, text_type, url=None):
         return TextNode(text, text_type, url)
 
-class TestSplitNodesDelimiter(unittest.TestCase):
     def test_text_to_code(self):
         node = TextNode("This is text with a `code block` word", TextType.NORMAL)
         new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
@@ -96,10 +95,9 @@ class TestSplitNodesDelimiter(unittest.TestCase):
 
     def test_expect_expection(self):
         node = TextNode("This is a `malformatted** text", TextType.NORMAL)
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
 
-class TestSplitNodesImage(unittest.TestCase):
     def test_split_image(self):
         node = TextNode(
             "![image](https://i.imgur.com/zjjcJKZ.png)",
@@ -140,7 +138,6 @@ class TestSplitNodesImage(unittest.TestCase):
         new_nodes = split_nodes_image([node])
         self.assertListEqual(new_nodes, expected)
 
-class TestSplitNodesLink(unittest.TestCase):
     def test_split_link(self):
         node = TextNode(
             "[link](https://www.google.com)",
@@ -181,7 +178,6 @@ class TestSplitNodesLink(unittest.TestCase):
         new_nodes = split_nodes_link([node])
         self.assertListEqual(new_nodes, expected)
 
-class TestTextToTextNodes(unittest.TestCase):
     def test_test_to_text_nodes(self):
         text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)" 
         expected = [
