@@ -29,7 +29,7 @@ def block_to_block_type(block):
 
     splitted = block.split("\n")
     if splitted[0].startswith("> "):
-        count = len(list(filter(lambda split: split.startswith("> "), splitted)))
+        count = len(list(filter(lambda split: split.startswith(">"), splitted)))
         if count == len(splitted):
             return BlockType.QUOTE
     
@@ -59,7 +59,7 @@ def block_to_html_node(block, block_type):
         case BlockType.HEADING:
             block_slice = block[block.index(" ") + 1:]
             heading = len(block) - len(block_slice) - 1
-            return LeafNode("h" + heading, block_slice) 
+            return LeafNode(f"h{heading}", block_slice) 
         case BlockType.QUOTE:
             children = []
             splitted = block.split("\n")

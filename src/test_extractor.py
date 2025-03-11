@@ -1,6 +1,10 @@
 import unittest
 
-from extractor import extract_markdown_images, extract_markdown_links
+from extractor import (
+        extract_markdown_images, 
+        extract_markdown_links,
+        extract_title
+)
 
 class TestExtractor(unittest.TestCase):
     def test_markdown_images_extractor(self):
@@ -45,6 +49,16 @@ class TestExtractor(unittest.TestCase):
                 ("boot.dev", "https://www.boot.dev")
         ]
         self.assertListEqual(matches, expected)
+
+    def test_extract_title(self):
+        test = extract_title("# Title")
+        expected = "Title"
+
+        self.assertEqual(test, expected)
+
+    def test_extract_title_raises(self):
+        with self.assertRaises(ValueError):
+            extract_title("#### Title")
 
 if __name__ == "__main__":
     unittest.main()
