@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 from pathlib import Path
 
@@ -6,9 +7,11 @@ from block import markdown_to_html_node
 from extractor import extract_title
 
 def main():
-    copy_folder("static", "public")
+    print("argv", sys.argv)
+    basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
+    copy_folder("static", "docs")
     # generate_page("content/index.md", "template.html", "public/index.html")
-    generate_pages_recursive("content", "template.html", "public")
+    generate_pages_recursive("content", "template.html", "docs", basepath)
 
 def copy_folder(src_dir, dst_dir):
     if os.path.exists(dst_dir):
@@ -27,7 +30,7 @@ def copy_folder(src_dir, dst_dir):
             os.mkdir(dst_item)
             copy_folder(src_item, dst_item)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     from_content = None
     template_content = None
@@ -36,36 +39,24 @@ def generate_page(from_path, template_path, dest_path):
     with open(template_path) as f:
         template_content = f.read()
 
-    html_content = markdown_to_html_node(from_content).to_html()
     title = extract_title(from_content)
-    template_content = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html_content)
+    html = markdown_to_html_node(from_content).to_html()
+    template_content = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html).replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
     with open(dest_path, "w") as f:
         f.write(template_content)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     items = os.listdir(dir_path_content)    
-    template_content = None
-    with open(template_path) as f:
-        template_content = f.read()   
-
     for item in items:
         src_path = Path(dir_path_content, item)
         dst_path = Path(dest_dir_path, item.replace(".md", ".html"))
 
         if os.path.isfile(src_path):
-            print(f"Generating page from {src_path} to {dst_path} using {template_path}")
-            src_content = None
-            with open(src_path) as f:
-                src_content = f.read()
-            title = extract_title(src_content)
-            html = markdown_to_html_node(src_content).to_html()
-            dst_content = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html)
-            with open(dst_path, "w") as f:
-                f.write(dst_content)
+            generate_page(src_path, template_path, dst_path, basepath) 
         else:
             print(f"Creating directory: {dst_path}")
             os.mkdir(dst_path)
-            generate_pages_recursive(src_path, template_path, dst_path)
+            generate_pages_recursive(src_path, template_path, dst_path, basepath)
 
 if __name__ == "__main__":
     main()
