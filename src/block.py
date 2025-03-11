@@ -59,7 +59,7 @@ def block_to_html_node(block, block_type):
         case BlockType.HEADING:
             block_slice = block[block.index(" ") + 1:]
             heading = len(block) - len(block_slice) - 1
-            return LeafNode(f"h{heading}", block_slice) 
+            return ParentNode(f"h{heading}", text_to_children(block_slice)) 
         case BlockType.QUOTE:
             children = []
             splitted = block.split("\n")
